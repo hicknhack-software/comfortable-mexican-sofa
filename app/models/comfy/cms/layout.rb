@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'slim/erb_converter'
+
 class Comfy::Cms::Layout < ActiveRecord::Base
   self.table_name = 'comfy_cms_layouts'
   
@@ -51,22 +53,33 @@ class Comfy::Cms::Layout < ActiveRecord::Base
       filename.split('/').last[0...1] == '_' ? nil : filename.split('.').first
     end.compact.sort
   end
+
+  CONTENT_REGEX = /\{\{\s*cms:page:content(?::(?<type>text|rich_text|slim))?\s*\}\}/
+
+  def slim?
+    parent && (m = parent.content.to_s.match(CONTENT_REGEX)) && m[:type] == 'slim'
+  end
   
   # -- Instance Methods -----------------------------------------------------
   # magical merging tag is {cms:page:content} If parent layout has this tag
   # defined its content will be merged. If no such tag found, parent content
   # is ignored.
   def merged_content
-    if parent
-      regex = /\{\{\s*cms:page:content:?(?:(?::text)|(?::rich_text))?\s*\}\}/
-      if parent.merged_content.match(regex)
-        parent.merged_content.gsub(regex, content.to_s)
-      else
-        content.to_s
-      end
-    else
-      content.to_s
-    end
+    @merged_content ||=
+        if parent
+          match = parent.merged_content.match(CONTENT_REGEX)
+          subst_content = content.to_s
+          if match
+            if match[:type] == 'slim'
+              subst_content = Slim::ERBConverter.new(file: label.to_s).call(subst_content)
+            end
+            parent.merged_content.gsub(CONTENT_REGEX, subst_content)
+          else
+            subst_content
+          end
+        else
+          content.to_s
+        end
   end
 
   def cache_buster

@@ -141,7 +141,7 @@ private
           tag.parent = parent_tag if parent_tag
           if tag.ancestors.none? {|a| a.id == tag.id}
             blockable.tags << tag
-            self.last_line_indentation(self.process_content(blockable, tag.render, tag).gsub("\n", "\n#{' '*context[:indention]}"), context)
+            self.last_line_indentation(self.process_content(blockable, tag.render, tag).gsub(/(\n\r?)/m, "\\1#{' '*context[:indention]}"), context)
           end
         end
       else

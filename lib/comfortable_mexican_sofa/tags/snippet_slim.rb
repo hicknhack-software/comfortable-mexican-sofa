@@ -23,7 +23,6 @@ class ComfortableMexicanSofa::Tag::SnippetSlim
     if parent && [ComfortableMexicanSofa::Tag::PageSlim,ComfortableMexicanSofa::Tag::SnippetSlim].include?(parent.class)
       processed
     else
-      puts processed
       Slim::ERBConverter.new(file: identifier.to_s).call(processed)
     end
   end
