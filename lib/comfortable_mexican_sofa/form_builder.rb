@@ -47,7 +47,7 @@ class ComfortableMexicanSofa::FormBuilder < BootstrapForm::FormBuilder
   end
 
   def field_text(tag, index)
-    default_tag_field(tag, index, :text_area_tag, :data => {'cms-cm-mode' => 'text/html'})
+    default_tag_field(tag, index, :text_area_tag, :data => {'cms-cm-mode' => (ComfortableMexicanSofa.config.allow_irb ? 'application/x-erb' : 'text/html')})
   end
 
   def field_rich_text(tag, index)
@@ -77,7 +77,7 @@ class ComfortableMexicanSofa::FormBuilder < BootstrapForm::FormBuilder
   end
 
   def page_text(tag, index)
-    default_tag_field(tag, index, :text_area_tag, :data => {'cms-cm-mode' => 'text/html'})
+    default_tag_field(tag, index, :text_area_tag, :data => {'cms-cm-mode' => (ComfortableMexicanSofa.config.allow_irb ? 'application/x-erb' : 'text/html')})
   end
 
   def page_rich_text(tag, index)

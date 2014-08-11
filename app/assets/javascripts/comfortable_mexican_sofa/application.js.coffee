@@ -8,6 +8,8 @@
 #= require codemirror/modes/javascript
 #= require codemirror/modes/markdown
 #= require codemirror/modes/xml
+#= require codemirror/modes/ruby
+#= require codemirror/modes/htmlembedded
 #= require codemirror/addons/edit/closetag
 #= require bootstrap
 #= require comfortable_mexican_sofa/lib/bootstrap-datetimepicker
