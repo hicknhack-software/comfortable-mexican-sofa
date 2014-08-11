@@ -12,7 +12,8 @@ module ComfortableMexicanSofa::Tag
   
   TOKENIZER_REGEX   = /(\{\{\s*cms:[^{}]*\}\})|((?:\{?[^{])+|\{+)/
   IDENTIFIER_REGEX  = /\w+[\-\.\w]+\w+/
-  
+  TAB_SIZE = 4
+
   attr_accessor :blockable,
                 :identifier,
                 :namespace,
@@ -120,7 +121,7 @@ private
       if tag_signature
         if tag = self.initialize_tag(blockable, tag_signature)
           tag.parent = parent_tag if parent_tag
-          if tag.ancestors.select{|a| a.id == tag.id}.blank?
+          if tag.ancestors.none? {|a| a.id == tag.id}
             blockable.tags << tag
             self.process_content(blockable, tag.render, tag)
           end
@@ -130,7 +131,36 @@ private
       end
     end.join('')
   end
-  
+
+  def self.process_content_with_indention(blockable, content = '', parent_tag = nil)
+    context = { :indention => 0 }
+    tokens = content.to_s.scan(TOKENIZER_REGEX)
+    tokens.collect do |tag_signature, text|
+      if tag_signature
+        if tag = self.initialize_tag(blockable, tag_signature)
+          tag.parent = parent_tag if parent_tag
+          if tag.ancestors.none? {|a| a.id == tag.id}
+            blockable.tags << tag
+            self.last_line_indentation(self.process_content(blockable, tag.render, tag).gsub("\n", "\n#{' '*context[:indention]}"), context)
+          end
+        end
+      else
+        self.last_line_indentation(text, context)
+      end
+    end.join('')
+  end
+
+  def self.last_line_indentation(text, context)
+    last_line = if m = text.match(/\n\r?([^\n]*)\z/m)
+      context[:indention] = 0
+      m[1]
+    else
+      text
+    end
+    context[:indention] += last_line.length + (TAB_SIZE-1)*last_line.count('\t')
+    text
+  end
+
   # Cleaning content from possible irb stuff. Partial and Helper tags are OK.
   def self.sanitize_irb(content, ignore = false)
     if ComfortableMexicanSofa.config.allow_irb || ignore
