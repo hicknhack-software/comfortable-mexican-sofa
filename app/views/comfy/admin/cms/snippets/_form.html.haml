@@ -5,7 +5,7 @@
 
 = form.text_field :label, :data => {:slugify => @snippet.new_record?}
 = form.text_field :identifier, :data => {:slug => true}
-= form.text_area :content, :data => {'cms-cm-mode' => (ComfortableMexicanSofa.config.allow_irb ? 'application/x-erb' : 'text/html')}
+= form.text_area :content, :data => {'cms-cm-mode' => (ComfortableMexicanSofa.config.allow_irb ? (@snippet.content.include?('‹%') ? 'application/x-erb' : 'application/x-slim') : 'text/html')}
 
 = render :partial => 'comfy/admin/cms/categories/form', :object => form
 

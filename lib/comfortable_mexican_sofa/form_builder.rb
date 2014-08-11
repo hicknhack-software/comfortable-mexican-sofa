@@ -80,6 +80,10 @@ class ComfortableMexicanSofa::FormBuilder < BootstrapForm::FormBuilder
     default_tag_field(tag, index, :text_area_tag, :data => {'cms-cm-mode' => (ComfortableMexicanSofa.config.allow_irb ? 'application/x-erb' : 'text/html')})
   end
 
+  def page_slim(tag, index)
+    default_tag_field(tag, index, :text_area_tag, :data => {'cms-cm-mode' => 'application/x-slim'})
+  end
+
   def page_rich_text(tag, index)
     default_tag_field(tag, index, :text_area_tag, :data => {'cms-rich-text' => true})
   end
