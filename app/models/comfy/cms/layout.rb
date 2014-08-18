@@ -56,8 +56,16 @@ class Comfy::Cms::Layout < ActiveRecord::Base
 
   CONTENT_REGEX = /\{\{\s*cms:page:content(?::(?<type>text|rich_text|slim))?\s*\}\}/
 
-  def slim?
-    parent && (m = parent.content.to_s.match(CONTENT_REGEX)) && m[:type] == 'slim'
+  def editor_mime_type
+    if ComfortableMexicanSofa.config.allow_irb
+      if new_record? || (parent && (m = parent.content.to_s.match(CONTENT_REGEX)) && m[:type] == 'slim')
+        'application/x-slim'
+      else
+        'application/x-erb'
+      end
+    else
+      'text/html'
+    end
   end
   
   # -- Instance Methods -----------------------------------------------------
