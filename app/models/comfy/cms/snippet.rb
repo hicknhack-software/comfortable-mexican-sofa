@@ -26,7 +26,19 @@ class Comfy::Cms::Snippet < ActiveRecord::Base
     
   # -- Scopes ---------------------------------------------------------------
   default_scope -> { order('comfy_cms_snippets.position') }
-  
+
+  def editor_mime_type
+    if ComfortableMexicanSofa.config.allow_irb
+      if content and content.include?('‹%')
+        'application/x-erb'
+      else
+        'application/x-slim'
+      end
+    else
+      'text/html'
+    end
+  end
+
 protected
   
   def assign_label

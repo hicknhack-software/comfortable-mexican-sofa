@@ -11,7 +11,7 @@
 - if (options = Comfy::Cms::Layout.app_layouts_for_select).present?
   = form.select :app_layout, [["---- #{t('.select_app_layout')} ----", nil]] + options
 
-= form.text_area :content, :data => {'cms-cm-mode' => (ComfortableMexicanSofa.config.allow_irb ? (@layout.slim? ? 'application/x-slim' : 'application/x-erb') : 'text/html')}
+= form.text_area :content, :data => {'cms-cm-mode' => @layout.editor_mime_type}
 = form.text_area :css, :data => {'cms-cm-mode' => 'css'}
 = form.text_area :js, :data => {'cms-cm-mode' => 'javascript'}
 
