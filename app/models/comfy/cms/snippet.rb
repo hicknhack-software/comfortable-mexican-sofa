@@ -10,6 +10,7 @@ class Comfy::Cms::Snippet < ActiveRecord::Base
   
   # -- Callbacks ------------------------------------------------------------
   before_validation :assign_label
+  after_validation :compile_content
   before_create :assign_position
   after_save    :clear_page_content_cache
   after_destroy :clear_page_content_cache
@@ -40,6 +41,13 @@ class Comfy::Cms::Snippet < ActiveRecord::Base
   end
 
 protected
+
+  def compile_content
+    if 'application/x-slim' == editor_mime_type
+      require 'slim/erb_converter'
+      Slim::ERBConverter.new(file: label).call(content.gsub(/\{\{.*?\}\}/, 'test') )
+    end
+  end
   
   def assign_label
     self.label = self.label.blank?? self.identifier.try(:titleize) : self.label

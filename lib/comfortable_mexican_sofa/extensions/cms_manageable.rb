@@ -60,12 +60,16 @@ module ComfortableMexicanSofa::CmsManageable
     # Processing content will return rendered content and will populate 
     # self.cms_tags with instances of CmsTag
     def render
+      backup = @tags
       @tags = [] # resetting
       return '' unless layout
       
       ComfortableMexicanSofa::Tag.process_content(
         self, ComfortableMexicanSofa::Tag.sanitize_irb(layout.merged_content)
       )
+    rescue
+      @tags = backup if backup
+      raise
     end
 
     def tags=(tags)
@@ -75,7 +79,7 @@ module ComfortableMexicanSofa::CmsManageable
     # Array of cms_tags for a page. Content generation is called if forced.
     # These also include initialized cms_blocks if present
     def tags(force_reload = false)
-      self.render if force_reload
+      self.render rescue '' if force_reload
       @tags ||= []
     end
 

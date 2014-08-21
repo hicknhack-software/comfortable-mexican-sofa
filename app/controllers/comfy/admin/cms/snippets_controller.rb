@@ -23,6 +23,9 @@ class Comfy::Admin::Cms::SnippetsController < Comfy::Admin::Cms::BaseController
   rescue ActiveRecord::RecordInvalid
     flash.now[:danger] = I18n.t('comfy.admin.cms.snippets.creation_failure')
     render :action => :new
+  rescue StandardError => e
+    flash.now[:danger] = "#{e.class.name}: #{e.message}"
+    render :action => :new
   end
 
   def update
@@ -31,6 +34,9 @@ class Comfy::Admin::Cms::SnippetsController < Comfy::Admin::Cms::BaseController
     redirect_to :action => :edit, :id => @snippet
   rescue ActiveRecord::RecordInvalid
     flash.now[:danger] = I18n.t('comfy.admin.cms.snippets.update_failure')
+    render :action => :edit
+  rescue StandardError => e
+    flash.now[:danger] = "#{e.class.name}: #{e.message}"
     render :action => :edit
   end
 
