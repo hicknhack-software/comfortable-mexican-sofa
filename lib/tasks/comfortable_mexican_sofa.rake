@@ -39,11 +39,11 @@ namespace :comfortable_mexican_sofa do
     desc 'Creates a site'
     task :create => :environment do
       id = ENV['ID']
-      host = ENV['HOST'] || 'localhost:3000'
+      hostname = ENV['HOST'] || 'localhost:3000'
 
       site = Comfy::Cms::Site.find_or_initialize_by identifier: id
-      if site.new_record? or site.host != host
-        site.update! host: host
+      if site.new_record? or site.hostname != hostname
+        site.update! hostname: hostname
         puts 'Updated or created site!'
       end
     end
