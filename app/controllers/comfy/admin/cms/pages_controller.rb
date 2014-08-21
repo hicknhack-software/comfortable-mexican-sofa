@@ -31,6 +31,9 @@ class Comfy::Admin::Cms::PagesController < Comfy::Admin::Cms::BaseController
   rescue ActiveRecord::RecordInvalid
     flash.now[:danger] = I18n.t('comfy.admin.cms.pages.creation_failure')
     render :action => :new
+  rescue StandardError => e
+    flash.now[:danger] = "#{e.class.name}: #{e.message}"
+    render :action => :new
   end
 
   def update
@@ -39,6 +42,9 @@ class Comfy::Admin::Cms::PagesController < Comfy::Admin::Cms::BaseController
     redirect_to :action => :edit, :id => @page
   rescue ActiveRecord::RecordInvalid
     flash.now[:danger] = I18n.t('comfy.admin.cms.pages.update_failure')
+    render :action => :edit
+  rescue StandardError => e
+    flash.now[:danger] = "#{e.class.name}: #{e.message}"
     render :action => :edit
   end
 
@@ -91,6 +97,7 @@ protected
 
   def load_cms_page
     @page = @site.pages.find(params[:id])
+    @page.render # render before attributes are updated, so we have valid tags in case of an error
     @page.attributes = page_params
     @page.layout ||= (@page.parent && @page.parent.layout || @site.layouts.first)
   rescue ActiveRecord::RecordNotFound

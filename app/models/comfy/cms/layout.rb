@@ -15,6 +15,7 @@ class Comfy::Cms::Layout < ActiveRecord::Base
   
   # -- Callbacks ------------------------------------------------------------
   before_validation :assign_label
+  after_validation :compile_content
   before_create :assign_position
   after_save    :clear_page_content_cache
   after_destroy :clear_page_content_cache
@@ -95,6 +96,10 @@ class Comfy::Cms::Layout < ActiveRecord::Base
   end
   
 protected
+
+  def compile_content
+    merged_content
+  end
   
   def assign_label
     self.label = self.label.blank?? self.identifier.try(:titleize) : self.label
