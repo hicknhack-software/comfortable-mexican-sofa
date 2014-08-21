@@ -34,4 +34,18 @@ namespace :comfortable_mexican_sofa do
       ComfortableMexicanSofa.logger = logger
     end
   end
+
+  namespace :site do
+    desc 'Creates a site'
+    task :create => :environment do
+      id = ENV['ID']
+      host = ENV['HOST'] || 'localhost:3000'
+
+      site = Comfy::Cms::Site.find_or_initialize_by identifier: id
+      if site.new_record? or site.host != host
+        site.update! host: host
+        puts 'Updated or created site!'
+      end
+    end
+  end
 end
