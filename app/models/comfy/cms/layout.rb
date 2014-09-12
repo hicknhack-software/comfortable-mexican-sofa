@@ -80,7 +80,7 @@ class Comfy::Cms::Layout < ActiveRecord::Base
           subst_content = content.to_s
           if match
             if match[:type] == 'slim'
-              subst_content = Slim::ERBConverter.new(file: label.to_s).call(subst_content)
+              subst_content = Slim::ERBConverter.new(file: label.to_s, disable_capture: true).call(subst_content)
             end
             parent.merged_content.gsub(CONTENT_REGEX, subst_content)
           else

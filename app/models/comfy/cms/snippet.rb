@@ -45,7 +45,7 @@ protected
   def compile_content
     if 'application/x-slim' == editor_mime_type
       require 'slim/erb_converter'
-      Slim::ERBConverter.new(file: label).call(content.gsub(/\{\{.*?\}\}/, 'test') )
+      Slim::ERBConverter.new(file: label, disable_capture: true).call(content.gsub(/\{\{.*?\}\}/, 'test') )
     end
   end
   
