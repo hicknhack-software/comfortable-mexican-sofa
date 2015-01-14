@@ -29,14 +29,37 @@ protected
 
   def render_page(status = 200)
     if @cms_layout = @cms_page.layout
-      app_layout = (@cms_layout.app_layout.blank? || request.xhr?) ? false : @cms_layout.app_layout
-      render  :inline       => @cms_page.content_cache,
-              :layout       => app_layout,
-              :status       => status,
-              :content_type => mime_type
+      render_page_with_layout status
     else
       render :text => I18n.t('comfy.cms.content.layout_not_found'), :status => 404
     end
+  end
+
+  def render_page_with_layout(status)
+    if is_asset_serve_request?
+      serve_asset
+    else
+      app_layout = (@cms_layout.app_layout.blank? || request.xhr?) ? false : @cms_layout.app_layout
+      render :inline => @cms_page.content_cache,
+             :layout => app_layout,
+             :status => status,
+             :content_type => mime_type
+    end
+  end
+
+  def is_asset_serve_request?
+    @file_name_block = @cms_page.blocks.find_by_identifier :serve_asset_path
+    @file_name_block.present?
+  end
+
+  def serve_asset
+    file_name = @file_name_block.content
+    asset_file = Comfy::Cms::File.where(file_file_name: file_name).first
+    raise ActionController::RoutingError.new("Asset Not Found: \"#{file_name}\"") if asset_file.nil?
+    send_file asset_file.file.path,
+              :disposition => 'inline',
+              :type => asset_file.file_content_type,
+              :x_sendfile => true
   end
 
   # it's possible to control mimetype of a page by creating a `mime_type` field
