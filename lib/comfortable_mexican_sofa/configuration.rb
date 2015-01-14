@@ -12,6 +12,9 @@ class ComfortableMexicanSofa::Configuration
   # Module that will handle authentication to access cms-admin area
   attr_accessor :admin_auth
 
+  # Module that will handle authorization against admin cms resources
+  attr_accessor :admin_authorization
+
   # Module that will handle authentication for public pages
   attr_accessor :public_auth
 
@@ -69,12 +72,16 @@ class ComfortableMexicanSofa::Configuration
   # Default is false.
   attr_accessor :reveal_cms_partials
 
+  # Auto-setting parameter derived from the routes
+  attr_accessor :public_cms_path
+
   # Configuration defaults
   def initialize
     @cms_title            = 'ComfortableMexicanSofa CMS Engine'
     @base_controller      = 'ApplicationController'
-    @admin_auth           = 'ComfortableMexicanSofa::HttpAuth'
-    @public_auth          = 'ComfortableMexicanSofa::DummyAuth'
+    @admin_auth           = 'ComfortableMexicanSofa::AccessControl::AdminAuthentication'
+    @admin_authorization  = 'ComfortableMexicanSofa::AccessControl::AdminAuthorization'
+    @public_auth          = 'ComfortableMexicanSofa::AccessControl::PublicAuthentication'
     @seed_data_path       = nil
     @admin_route_redirect = ''
     @enable_sitemap       = true
@@ -88,6 +95,7 @@ class ComfortableMexicanSofa::Configuration
       'es'    => 'Español',
       'pt-BR' => 'Português Brasileiro',
       'zh-CN' => '简体中文',
+      'zh-TW' => '正體中文',
       'ja'    => '日本語',
       'sv'    => 'Svenska',
       'ru'    => 'Русский',
@@ -96,7 +104,8 @@ class ComfortableMexicanSofa::Configuration
       'nl'    => 'Nederlands',
       'it'    => 'Italiano',
       'da'    => 'Dansk',
-      'cs'    => 'Česky'
+      'cs'    => 'Česky',
+      'nb'    => 'Norsk'
     }
     @admin_locale         = nil
     @admin_cache_sweeper  = nil
@@ -105,6 +114,7 @@ class ComfortableMexicanSofa::Configuration
     @allowed_partials     = nil
     @hostname_aliases     = nil
     @reveal_cms_partials  = false
+    @public_cms_path      = nil
   end
 
 end

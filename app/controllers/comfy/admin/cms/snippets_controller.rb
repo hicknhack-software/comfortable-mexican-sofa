@@ -2,6 +2,7 @@ class Comfy::Admin::Cms::SnippetsController < Comfy::Admin::Cms::BaseController
 
   before_action :build_snippet, :only => [:new, :create]
   before_action :load_snippet,  :only => [:edit, :update, :destroy]
+  before_action :authorize
 
   def index
     return redirect_to :action => :new if @site.snippets.count == 0
@@ -45,7 +46,7 @@ class Comfy::Admin::Cms::SnippetsController < Comfy::Admin::Cms::BaseController
     flash[:success] = I18n.t('comfy.admin.cms.snippets.deleted')
     redirect_to :action => :index
   end
-  
+
   def reorder
     (params[:comfy_cms_snippet] || []).each_with_index do |id, index|
       ::Comfy::Cms::Snippet.where(:id => id).update_all(:position => index)
@@ -65,7 +66,7 @@ protected
     flash[:danger] = I18n.t('comfy.admin.cms.snippets.not_found')
     redirect_to :action => :index
   end
-  
+
   def snippet_params
     params.fetch(:snippet, {}).permit!
   end

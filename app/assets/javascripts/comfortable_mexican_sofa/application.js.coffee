@@ -1,4 +1,5 @@
 #= require jquery
+#= require bootstrap-sprockets
 #= require jquery_ujs
 #= require jquery-ui
 #= require tinymce-jquery
@@ -16,28 +17,29 @@
 #= require bootstrap
 #= require comfortable_mexican_sofa/lib/bootstrap-datetimepicker
 #= require comfortable_mexican_sofa/lib/diff
+#= require comfortable_mexican_sofa/cms/uploader
+#= require comfortable_mexican_sofa/cms/files
+
+window.CMS ||= {}
+
+window.CMS.current_path           = window.location.pathname
+window.CMS.code_mirror_instances  = [ ]
 
 $ ->
   CMS.init()
 
-window.CMS =
-  current_path:           window.location.pathname
-  code_mirror_instances:  []
-  
-  init: ->
-    CMS.slugify()
-    CMS.wysiwyg()
-    CMS.codemirror()
-    CMS.sortable_list()
-    CMS.timepicker()
-    CMS.page_blocks()
-    CMS.mirrors()
-    CMS.page_update_preview()
-    CMS.page_update_publish()
-    CMS.categories()
-    CMS.uploader()
-    CMS.uploaded_files()
-
+window.CMS.init = ->
+  CMS.slugify()
+  CMS.wysiwyg()
+  CMS.codemirror()
+  CMS.sortable_list()
+  CMS.timepicker()
+  CMS.page_blocks()
+  CMS.mirrors()
+  CMS.page_update_preview()
+  CMS.page_update_publish()
+  CMS.categories()
+  CMS.files()
 
 window.CMS.slugify = ->
   slugify = (str) ->
@@ -50,19 +52,22 @@ window.CMS.slugify = ->
     str = str.replace(chars_to_replace_with_delimiter, '-')
     chars_to_remove = new RegExp('[^a-zA-Z0-9 -]', 'g')
     str = str.replace(chars_to_remove, '').replace(/\s+/g, '-').toLowerCase()
-    
+
   $('input[data-slugify=true]').bind 'keyup.cms', ->
     $('input[data-slug=true]').val(slugify($(this).val()))
 
 
 window.CMS.wysiwyg = ->
   tinymce.init
-    selector:       'textarea[data-cms-rich-text]'
-    plugins:        ['link', 'image', 'code']
-    toolbar:        'undo redo | styleselect | bullist numlist | link unlink image | code'
-    menubar:        false
-    statusbar:      false
-    relative_urls:  false
+    selector:         'textarea[data-cms-rich-text]'
+    plugins:          ['link', 'image', 'code', 'autoresize']
+    toolbar:          'undo redo | styleselect | bullist numlist | link unlink image | code'
+    menubar:          false
+    statusbar:        false
+    relative_urls:    false
+    entity_encoding : 'raw'
+    autoresize_bottom_margin : 0
+
 
 window.CMS.codemirror = ->
   $('textarea[data-cms-cm-mode]').each (i, element) ->
@@ -75,14 +80,11 @@ window.CMS.codemirror = ->
     $(cm.display.wrapper).resizable resize: ->
       cm.setSize($(@).width(), $(@).height())
       cm.refresh()
-      return
-    return
 
   $('a[data-toggle="tab"]').on 'shown', ->
     for cm in CMS.code_mirror_instances
       cm.refresh()
-    return
-  return
+
 
 window.CMS.sortable_list = ->
   $('.sortable').sortable
@@ -109,11 +111,14 @@ window.CMS.page_blocks = ->
       url: $(this).data('url'),
       data:
         layout_id: $(this).val()
+      beforeSend: ->
+        tinymce.remove()
       complete: ->
         CMS.wysiwyg()
         CMS.timepicker()
         CMS.codemirror()
         CMS.reinitialize_page_blocks() if CMS.reinitialize_page_blocks?
+
 
 window.CMS.mirrors = ->
   $('#mirrors select').change ->
@@ -131,7 +136,7 @@ window.CMS.page_update_publish = ->
   widget = $('#form-save')
   $('input', widget).prop('checked', $('input#page_is_published').is(':checked'))
   $('button', widget).html($('input[name=commit]').val())
-  
+
   $('input', widget).click ->
     $('input#page_is_published').prop('checked', $(this).is(':checked'))
   $('input#page_is_published').click ->
@@ -149,32 +154,18 @@ window.CMS.categories = ->
     $('.done', '.categories-widget').toggle()
 
 
-window.CMS.uploader = ->
-  form    = $('.file-uploader form')
-  iframe  = $('iframe#file-upload-frame')
-  
-  $('input[type=file]', form).change -> form.submit()
-    
-  iframe.load -> upload_loaded()
-  
-  upload_loaded = ->
-    i = iframe[0]
-    d = if i.contentDocument
-      i.contentDocument
-    else if i.contentWindow
-      i.contentWindow.document
-    else
-      i.document
-    
-    if d.body.innerHTML
-      raw_string  = d.body.innerHTML
-      json_string = raw_string.match(/\{(.|\n)*\}/)[0]
-      json = $.parseJSON(json_string)
-      files = $('<div/>').html(json.view).hide()
-      $('.uploaded-files').prepend(files)
-      files.map ->
-        $(this).fadeIn()
+# If we are inside an iframe remove the columns and just keep the center column content.
+# This is used for the files widget that opens in a modal window.
+window.CMS.set_iframe_layout = ->
+  in_iframe = ->
+    try
+      return window.self != window.top
+    catch e
+      return true
 
-window.CMS.uploaded_files = ->
-  $('.uploaded-files').on 'click', 'input', ->
-    $(this).select()
+  $('body').ready ->
+    if in_iframe()
+      $('body').addClass('in-iframe')
+
+# Triggering this right away to prevent flicker
+window.CMS.set_iframe_layout()

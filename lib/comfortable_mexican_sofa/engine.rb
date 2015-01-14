@@ -12,9 +12,9 @@ require 'haml-rails'
 require 'sass-rails'
 require 'coffee-rails'
 require 'codemirror-rails'
-require 'kaminari'
 require 'tinymce-rails'
 require 'bootstrap-sass'
+require 'plupload-rails'
 
 module ComfortableMexicanSofa
   class Engine < ::Rails::Engine
