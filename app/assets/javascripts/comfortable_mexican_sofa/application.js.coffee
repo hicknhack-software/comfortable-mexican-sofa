@@ -13,6 +13,7 @@
 #= require codemirror/modes/markdown
 #= require codemirror/modes/coffeescript
 #= require codemirror/modes/slim
+#= require codemirror/modes/asciidoc
 #= require codemirror/addons/edit/closetag
 #= require bootstrap
 #= require comfortable_mexican_sofa/lib/bootstrap-datetimepicker
