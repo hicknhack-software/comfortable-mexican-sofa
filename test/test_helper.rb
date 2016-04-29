@@ -1,9 +1,13 @@
 # encoding: utf-8
 ENV['RAILS_ENV'] = 'test'
 
+require 'simplecov'
 require 'coveralls'
-Coveralls.wear! 'rails'
-
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+SimpleCov.start do
+  add_filter 'lib/generators'
+  add_filter 'lib/comfortable_mexican_sofa/engine.rb '
+end
 require_relative '../config/environment'
 
 require 'rails/test_help'
@@ -30,6 +34,7 @@ class ActiveSupport::TestCase
       config.admin_auth           = 'ComfortableMexicanSofa::AccessControl::AdminAuthentication'
       config.admin_authorization  = 'ComfortableMexicanSofa::AccessControl::AdminAuthorization'
       config.public_auth          = 'ComfortableMexicanSofa::AccessControl::PublicAuthentication'
+      config.public_authorization = 'ComfortableMexicanSofa::AccessControl::PublicAuthorization'
       config.admin_route_redirect = ''
       config.enable_fixtures      = false
       config.fixtures_path        = File.expand_path('db/cms_fixtures', Rails.root)

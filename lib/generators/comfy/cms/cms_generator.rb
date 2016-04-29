@@ -26,13 +26,6 @@ module Comfy
           'config/initializers/comfortable_mexican_sofa.rb'
       end
 
-      def generate_mime_types
-        create_file 'config/initializers/mime_types.rb'
-        append_to_file 'config/initializers/mime_types.rb' do
-          "Mime::Type.register 'text/plupload', :plupload unless Mime::Type.lookup_by_extension(:plupload)"
-        end
-      end
-
       def generate_routing
         route_string  = "  comfy_route :cms_admin, :path => '/admin'\n\n"
         route_string << "  # Make sure this routeset is defined last\n"
@@ -45,10 +38,10 @@ module Comfy
       end
 
       def generate_assets
-        directory 'app/assets/javascripts/comfortable_mexican_sofa/admin',
-          'app/assets/javascripts/comfortable_mexican_sofa/admin'
-        directory 'app/assets/stylesheets/comfortable_mexican_sofa/admin',
-          'app/assets/stylesheets/comfortable_mexican_sofa/admin'
+        copy_file 'app/assets/javascripts/comfy/admin/cms/custom.js.coffee',
+          'app/assets/javascripts/comfy/admin/cms/custom.js.coffee'
+        copy_file 'app/assets/stylesheets/comfy/admin/cms/custom.sass',
+          'app/assets/stylesheets/comfy/admin/cms/custom.sass'
       end
 
       def show_readme

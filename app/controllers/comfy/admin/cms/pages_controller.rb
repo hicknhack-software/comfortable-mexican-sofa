@@ -1,5 +1,4 @@
 class Comfy::Admin::Cms::PagesController < Comfy::Admin::Cms::BaseController
-
   before_action :check_for_layouts, :only => [:new, :edit]
   before_action :build_cms_page,    :only => [:new, :create]
   before_action :load_cms_page,     :only => [:edit, :update, :destroy]
@@ -8,6 +7,8 @@ class Comfy::Admin::Cms::PagesController < Comfy::Admin::Cms::BaseController
 
   def index
     return redirect_to :action => :new if site_has_no_pages?
+
+    return index_for_redactor if params[:source] == 'redactor'
 
     @pages_by_parent = pages_grouped_by_parent
 
@@ -80,6 +81,25 @@ class Comfy::Admin::Cms::PagesController < Comfy::Admin::Cms::BaseController
 
 protected
 
+  def index_for_redactor
+    tree_walker = ->(page, list, offset) do
+      return unless page.present?
+      label = "#{'. . ' * offset}#{page.label}"
+      list << {:name => label, :url => page.url(:relative)}
+      page.children.each do |child_page|
+        tree_walker.(child_page, list, offset + 1)
+      end
+      list
+    end
+
+    page_select_options = [{
+      :name => I18n.t('comfy.admin.cms.pages.form.choose_link'),
+      :url  => false
+    }] + tree_walker.(@site.pages.root, [ ], 0)
+
+    render :json => page_select_options
+  end
+
   def site_has_no_pages?
     @site.pages.count == 0
   end
@@ -117,6 +137,10 @@ protected
       @cms_site   = @page.site
       @cms_layout = @page.layout
       @cms_page   = @page
+
+      # Make sure to use the site locale to render the preview becaue it might
+      # be different from the admin locale.
+      I18n.locale = @cms_site.locale
 
       # Chrome chokes on content with iframes. Issue #434
       response.headers['X-XSS-Protection'] = '0'

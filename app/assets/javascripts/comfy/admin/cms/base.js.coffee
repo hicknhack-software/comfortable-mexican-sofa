@@ -1,41 +1,20 @@
-#= require jquery
-#= require bootstrap-sprockets
-#= require jquery_ujs
-#= require jquery-ui
-#= require tinymce-jquery
-#= require codemirror
-#= require codemirror/modes/css
-#= require codemirror/modes/javascript
-#= require codemirror/modes/xml
-#= require codemirror/modes/htmlmixed
-#= require codemirror/modes/ruby
-#= require codemirror/modes/htmlembedded
-#= require codemirror/modes/markdown
-#= require codemirror/modes/coffeescript
-#= require codemirror/modes/slim
-#= require codemirror/modes/asciidoc
-#= require codemirror/addons/edit/closetag
-#= require bootstrap
-#= require comfortable_mexican_sofa/lib/bootstrap-datetimepicker
-#= require comfortable_mexican_sofa/lib/diff
-#= require comfortable_mexican_sofa/cms/uploader
-#= require comfortable_mexican_sofa/cms/files
-
 window.CMS ||= {}
 
-window.CMS.current_path           = window.location.pathname
-window.CMS.code_mirror_instances  = [ ]
+window.CMS.code_mirror_instances = [ ]
 
-$ ->
+$(document).on 'page:load ready', ->
+  window.CMS.current_path = window.location.pathname
   CMS.init()
 
 window.CMS.init = ->
+  CMS.set_iframe_layout()
   CMS.slugify()
   CMS.wysiwyg()
   CMS.codemirror()
   CMS.sortable_list()
   CMS.timepicker()
   CMS.page_blocks()
+  CMS.page_file_popovers()
   CMS.mirrors()
   CMS.page_update_preview()
   CMS.page_update_publish()
@@ -44,30 +23,75 @@ window.CMS.init = ->
 
 window.CMS.slugify = ->
   slugify = (str) ->
-    str   = str.replace(/^\s+|\s+$/g, '')
-    from  = "ÀÁÄÂÃÈÉËÊÌÍÏÎÒÓÖÔÕÙÚÜÛàáäâãèéëêìíïîòóöôõùúüûÑñÇç"
-    to    = "aaaaaeeeeiiiiooooouuuuaaaaaeeeeiiiiooooouuuunncc"
-    for i in [0..from.length - 1]
-      str = str.replace(new RegExp(from[i], "g"), to[i])
-    chars_to_replace_with_delimiter = new RegExp('[·/,:;_]', 'g')
-    str = str.replace(chars_to_replace_with_delimiter, '-')
-    chars_to_remove = new RegExp('[^a-zA-Z0-9 -]', 'g')
-    str = str.replace(chars_to_remove, '').replace(/\s+/g, '-').toLowerCase()
+    # Trim string and lower case.
+    str = str.replace(/^\s+|\s+$/g, '').toLowerCase()
+
+    # Replace special chars.
+    replacements = [
+      ['à', 'a'],
+      ['á', 'a'],
+      ['ä', 'ae'],
+      ['â', 'a'],
+      ['ã', 'a'],
+      ['è', 'e'],
+      ['é', 'e'],
+      ['ë', 'e'],
+      ['ê', 'e'],
+      ['ì', 'i'],
+      ['í', 'i'],
+      ['ï', 'i'],
+      ['î', 'i'],
+      ['ò', 'o'],
+      ['ó', 'o'],
+      ['ö', 'oe'],
+      ['ô', 'o'],
+      ['õ', 'o'],
+      ['ù', 'u'],
+      ['ú', 'u'],
+      ['ü', 'ue'],
+      ['û', 'u'],
+      ['ñ', 'n'],
+      ['ç', 'c'],
+      ['ß', 'ss'],
+      ['·', '-'],
+      ['/', '-'],
+      [',', '-'],
+      [':', '-'],
+      [';', '-'],
+      ['_', '-'],
+      [' ', '-'],
+    ]
+
+    for replacement in replacements
+      str = str.replace(new RegExp(replacement[0], 'g'), replacement[1])
+
+    # Remove any other URL incompatible characters and replace multiple dashes with just a single one.
+    str = str.replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-')
 
   $('input[data-slugify=true]').bind 'keyup.cms', ->
     $('input[data-slug=true]').val(slugify($(this).val()))
 
 
 window.CMS.wysiwyg = ->
-  tinymce.init
-    selector:         'textarea[data-cms-rich-text]'
-    plugins:          ['link', 'image', 'code', 'autoresize']
-    toolbar:          'undo redo | styleselect | bullist numlist | link unlink image | code'
-    menubar:          false
-    statusbar:        false
-    relative_urls:    false
-    entity_encoding : 'raw'
-    autoresize_bottom_margin : 0
+  csrf_token = $('meta[name=csrf-token]').attr('content')
+  csrf_param = $('meta[name=csrf-param]').attr('content')
+
+  if (csrf_param != undefined && csrf_token != undefined)
+    params = csrf_param + "=" + encodeURIComponent(csrf_token)
+
+  $('textarea.rich-text-editor, textarea[data-cms-rich-text]').redactor
+    minHeight:        160
+    autoresize:       true
+    imageUpload:      "#{CMS.file_upload_path}?source=redactor&type=image&#{params}"
+    imageManagerJson: "#{CMS.file_upload_path}?source=redactor&type=image"
+    fileUpload:       "#{CMS.file_upload_path}?source=redactor&type=file&#{params}"
+    fileManagerJson:  "#{CMS.file_upload_path}?source=redactor&type=file"
+    definedLinks:     "#{CMS.pages_path}?source=redactor"
+    buttonSource:     true
+    formatting:       ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    plugins:          ['imagemanager', 'filemanager', 'table', 'video', 'definedlinks']
+    lang:             CMS.locale
+    convertDivs:      false
 
 
 window.CMS.codemirror = ->
@@ -112,13 +136,18 @@ window.CMS.page_blocks = ->
       url: $(this).data('url'),
       data:
         layout_id: $(this).val()
-      beforeSend: ->
-        tinymce.remove()
       complete: ->
         CMS.wysiwyg()
         CMS.timepicker()
         CMS.codemirror()
-        CMS.reinitialize_page_blocks() if CMS.reinitialize_page_blocks?
+        CMS.page_file_popovers()
+
+
+window.CMS.page_file_popovers = ->
+  $('[data-toggle="page-file-popover"]').popover
+    trigger:    'hover'
+    placement:  'top'
+    html:       true
 
 
 window.CMS.mirrors = ->
@@ -130,7 +159,7 @@ window.CMS.page_update_preview = ->
   $('input[name=commit]').click ->
     $(this).parents('form').attr('target', '')
   $('input[name=preview]').click ->
-    $(this).parents('form').attr('target', '_blank')
+    $(this).parents('form').attr('target', 'comfy-cms-preview')
 
 
 window.CMS.page_update_publish = ->
@@ -167,6 +196,3 @@ window.CMS.set_iframe_layout = ->
   $('body').ready ->
     if in_iframe()
       $('body').addClass('in-iframe')
-
-# Triggering this right away to prevent flicker
-window.CMS.set_iframe_layout()

@@ -18,6 +18,9 @@ class ComfortableMexicanSofa::Configuration
   # Module that will handle authentication for public pages
   attr_accessor :public_auth
 
+  # Module that will handle authorization against public resources
+  attr_accessor :public_authorization
+
   # When arriving at /cms-admin you may chose to redirect to arbirtary path,
   # for example '/cms-admin/users'
   attr_accessor :admin_route_redirect
@@ -82,6 +85,7 @@ class ComfortableMexicanSofa::Configuration
     @admin_auth           = 'ComfortableMexicanSofa::AccessControl::AdminAuthentication'
     @admin_authorization  = 'ComfortableMexicanSofa::AccessControl::AdminAuthorization'
     @public_auth          = 'ComfortableMexicanSofa::AccessControl::PublicAuthentication'
+    @public_authorization = 'ComfortableMexicanSofa::AccessControl::PublicAuthorization'
     @seed_data_path       = nil
     @admin_route_redirect = ''
     @enable_sitemap       = true
@@ -90,22 +94,24 @@ class ComfortableMexicanSofa::Configuration
     @fixtures_path        = File.expand_path('db/cms_fixtures', Rails.root)
     @revisions_limit      = 25
     @locales              = {
-      'en'    => 'English',
-      'fr'    => 'Français',
-      'es'    => 'Español',
-      'pt-BR' => 'Português Brasileiro',
-      'zh-CN' => '简体中文',
-      'zh-TW' => '正體中文',
-      'ja'    => '日本語',
-      'sv'    => 'Svenska',
-      'ru'    => 'Русский',
-      'pl'    => 'Polski',
-      'de'    => 'Deutsch',
-      'nl'    => 'Nederlands',
-      'it'    => 'Italiano',
-      'da'    => 'Dansk',
       'cs'    => 'Česky',
-      'nb'    => 'Norsk'
+      'da'    => 'Dansk',
+      'de'    => 'Deutsch',
+      'en'    => 'English',
+      'es'    => 'Español',
+      'fr'    => 'Français',
+      'it'    => 'Italiano',
+      'ja'    => '日本語',
+      'nb'    => 'Norsk',
+      'nl'    => 'Nederlands',
+      'pl'    => 'Polski',
+      'pt-BR' => 'Português Brasileiro',
+      'ru'    => 'Русский',
+      'sk'    => 'Slovensky',
+      'sv'    => 'Svenska',
+      'uk'    => 'Українська',
+      'zh-CN' => '简体中文',
+      'zh-TW' => '正體中文'
     }
     @admin_locale         = nil
     @admin_cache_sweeper  = nil
