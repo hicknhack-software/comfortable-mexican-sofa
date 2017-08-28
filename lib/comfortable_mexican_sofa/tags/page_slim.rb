@@ -1,5 +1,3 @@
-require 'slim/erb_converter'
-
 class ComfortableMexicanSofa::Tag::PageSlim
   include ComfortableMexicanSofa::Tag
 
@@ -17,7 +15,7 @@ class ComfortableMexicanSofa::Tag::PageSlim
     if parent && [ComfortableMexicanSofa::Tag::PageSlim,ComfortableMexicanSofa::Tag::SnippetSlim].include?(parent.class)
       processed
     else
-      Slim::ERBConverter.new(file: identifier.to_s, disable_capture: true).call(processed)
+      ComfortableMexicanSofa::Tag::SlimErb::Converter.new(file: identifier.to_s, disable_capture: true).call(processed)
     end
   end
 end
