@@ -71,6 +71,19 @@ class Comfy::Cms::Layout < ActiveRecord::Base
         n[:tag_params].split(%r{\s}).first == "content"
       end
 
+      if replacement_position  
+        parent_tag = parent_tokens[replacement_position]
+        if parent_tag[:tag_class] == 'slim' then
+          content = SlimErb::Converter.new(file: identifier.to_s, disable_capture: true).call(self.content.to_s)
+        elsif parent_tag[:tag_class] == 'markdown' then 
+          content = Kramdown::Document.new(self.content.to_s).to_html
+        else
+          content = self.content
+        end
+
+        tokens    = renderer.tokenize(content)
+      end
+
       if replacement_position
         parent_tokens[replacement_position] = tokens
         tokens = parent_tokens.flatten
