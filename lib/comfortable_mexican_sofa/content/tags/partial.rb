@@ -12,7 +12,7 @@ class ComfortableMexicanSofa::Content::Tag::Partial < ComfortableMexicanSofa::Co
 
   def initialize(context:, params: [], source: nil)
     super
-    @locals = params.extract_options!
+    @locals = params.extract_options!.symbolize_keys
     @path   = params[0]
 
     unless @path.present?
