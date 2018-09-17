@@ -11,6 +11,9 @@ class ComfortableMexicanSofa::Content::Tag::Snippet < ComfortableMexicanSofa::Co
   def initialize(context:, params: [], source: nil)
     super
     @identifier = params[0]
+    @options    = params.extract_options!
+
+    @markup = @options["markup"]
 
     unless @identifier.present?
       raise Error, "Missing identifier for snippet tag"
@@ -27,6 +30,16 @@ class ComfortableMexicanSofa::Content::Tag::Snippet < ComfortableMexicanSofa::Co
       context.site.snippets.build(identifier: identifier)
   end
 
+  def render
+    case @markup
+    when "slim"
+      SlimErb::Converter.new(file: identifier.to_s, disable_capture: true).call(content.to_s)
+    when "markdown"
+      Kramdown::Document.new(self.content.to_s).to_html
+    else
+      content.to_s
+    end
+  end 
 end
 
 ComfortableMexicanSofa::Content::Renderer.register_tag(
