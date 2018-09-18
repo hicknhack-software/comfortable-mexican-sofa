@@ -37,8 +37,14 @@ class ComfortableMexicanSofa::Content::ParamsParser
   #   #=> ["a", {"b" => {"c" => ["d", "e"]}}]
   #
   def params
-    @tokens = tokenize(@string)
-    parse_params
+    begin
+      @tokens = tokenize(@string)
+      parse_params
+    rescue
+      message = "ParamsParser: Error tokenizing \"#{@string}\""
+      ComfortableMexicanSofa.logger.warn(message)
+      []
+    end
   end
 
 private
