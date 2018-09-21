@@ -6,6 +6,7 @@
 //= require comfy/vendor/codemirror/mode/htmlmixed/htmlmixed
 //= require comfy/vendor/codemirror/mode/javascript/javascript
 //= require comfy/vendor/codemirror/mode/markdown/markdown
+//= require comfy/vendor/codemirror/mode/slim/slim
 //= require comfy/vendor/codemirror/mode/xml/xml
 //= require comfy/vendor/codemirror/addon/edit/closetag
 //= require comfy/vendor/sortable.min
