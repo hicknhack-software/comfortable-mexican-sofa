@@ -119,6 +119,8 @@ class ComfortableMexicanSofa::Content::Renderer
           klass = self.class.tags[tag_class] ||
             raise(SyntaxError, "Unrecognized tag: #{token[:source]}")
 
+
+          begin
           # @type [ComfortableMexicanSofa::Content::Tag]
           tag = klass.new(
             context:  @context,
@@ -126,6 +128,8 @@ class ComfortableMexicanSofa::Content::Renderer
             source:   token[:source]
           )
           nodes.last << tag
+          rescue
+          end
 
           # If it's a block tag we start collecting nodes into it
           if tag.is_a?(ComfortableMexicanSofa::Content::Block)
