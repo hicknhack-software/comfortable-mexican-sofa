@@ -22,6 +22,7 @@ module Comfy::Cms::WithCategories
         distinct
           .joins(categorizations: :category)
           .where("comfy_cms_categories.label" => categories)
+          .order('position')
       end
     }
   end
