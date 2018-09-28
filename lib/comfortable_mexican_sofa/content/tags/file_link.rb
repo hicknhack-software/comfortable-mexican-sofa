@@ -40,7 +40,7 @@ class ComfortableMexicanSofa::Content::Tag::FileLink < ComfortableMexicanSofa::C
 
   # @return [Comfy::Cms::File]
   def file_record
-    @file_record ||= context.site.files.detect { |f| f.id == identifier.to_i }
+    @file_record ||= context.site.files.detect { |f| f.id == identifier.to_i or f.label == identifier.humanize.titleize }
   end
 
   # @return [ActiveStorage::Blob]
