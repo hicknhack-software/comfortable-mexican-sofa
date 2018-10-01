@@ -30,6 +30,10 @@
             - namespace.each_with_index do |(name, tags), index|
               .tab-pane{id: "ns-#{name}", class: index == 0 ? "active" : nil}
                 - tags.each do |tag|
+                  - begin tag.nodes
+                  - rescue ComfortableMexicanSofa::Content::Renderer::SyntaxError, ComfortableMexicanSofa::Content::Tag::Error => e
+                    .alert.alert-danger
+                      = e
                   = form.fragment_field(tag, frag_index)
                   - frag_index += 1
 
